@@ -10,36 +10,10 @@ defmodule App do
         loop(num_of_clients, following_num, limit, 1)
     end
 
-    def loop(num_of_clients, following_num, limit, n) when n > 0 do            
-        # Coordinator.start_link(num_of_clients)
-        # IO.puts "#{inspect num_of_clients} users are started in the simulator..." 
-        
-        
-        # Coordinator.simulate_register_account(:coordinator)  
+    def loop(num_of_clients, following_num, limit, n) when n > 0 do              
         Enum.each(1..num_of_clients, fn(user) ->
             user |> Integer.to_string |> SocketClient.start_link(following_num, limit)
         end)
-
-        # IO.puts "Finished simulating registeration..."
-        # IO.puts "================================================================="
-        
-        # Coordinator.simulate_zipf_distribution(:coordinator, following_num, limit) 
-        # IO.puts "Finished simuling zipf's distribution..."
-        # IO.puts "================================================================="
-
-        # Coordinator.simulate_retweet(:coordinator)  
-        # IO.puts "Finished simulating re_tweet..."
-        # IO.puts "=================================================================" 
-
-        # Coordinator.simulate_query(:coordinator)  
-        # IO.puts "Finished simulating query tweets..."
-        # IO.puts "=================================================================" 
-        
-        # IO.puts "Start simulating user connection, user's timeline will be automatically updated..."        
-        # Coordinator.simulate_user_connection(:coordinator)  
-        # IO.puts "Finished simulating user connection..."
-        # IO.puts "================================================================="        
-
         loop(num_of_clients, following_num, limit, n - 1)
     end
 
