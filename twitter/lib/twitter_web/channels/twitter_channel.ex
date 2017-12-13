@@ -1,10 +1,10 @@
-defmodule TwitterWeb.TweeterChannel do
+defmodule TwitterWeb.TwitterChannel do
   use TwitterWeb, :channel
   require Logger
 
   alias Twitter.Server
   
-  def join("tweeter", payload, socket) do
+  def join("twitter", payload, socket) do
     if authorized?(payload) do
       {:ok, socket}
     else
@@ -16,7 +16,7 @@ defmodule TwitterWeb.TweeterChannel do
   def handle_in("register_account", %{"userID" => userID}, socket) do 
     case Server.register_account(userID) do
       :ok ->
-        Logger.info("A user is successfully registered with ID: #{userID}!")
+        Logger.info("A user is successfully registered with ID: #{userID}")
         {:noreply, socket}
       :duplicate ->  
         Logger.info("This username is already registered, please try another one.")

@@ -21,4 +21,4 @@ import "phoenix_html"
 
 
 // !!!!!!!!!!!!!!!! uncomment the following line if we want to use the javascript client
-// import socket from "./socket"
+import socket from "./socket"

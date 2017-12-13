@@ -54,34 +54,30 @@ let socket = new Socket("/socket", {params: {token: window.userToken}})
 socket.connect()
 
 // Now that you are connected, you can join channels with a topic:
-let channel1 = socket.channel("register:lobby", {})
+let channel = socket.channel("twitter", {})
 let registerInput = document.querySelector("#register-input")
 let tweetsContainer = document.querySelector("#tweets")
 
-
-let channel2 = socket.channel("subscribe:lobby", {})
 let subscribeInput = document.querySelector("#subscribe-input")
-
-let channel3 = socket.channel("tweet:lobby", {})
 let tweetInput = document.querySelector("#tweet-input")
 
 registerInput.addEventListener("keypress", event => {
   if(event.keyCode === 13){
-    channel1.push("register_account", {body: registerInput.value})
+    channel.push("register_account", {userID: registerInput.value})
     registerInput.value = ""
   }
 })
 
 subscribeInput.addEventListener("keypress", event => {
   if(event.keyCode === 13){
-    channel3.push("send_tweet", {body: subscribeInput.value, userID: 1})
+    channel.push("subscribe", {to_subscribe_ID: subscribeInput.value, userID: "1"})
     registerInput.value = ""
   }
 })
 
 tweetInput.addEventListener("keypress", event => {
   if(event.keyCode === 13){
-    channel2.push("register_account", {body: tweetInput.value, userID: registerInput})
+    channel.push("register_account", {body: tweetInput.value, userID: registerInput})
     registerInput.value = ""
   }
 })
@@ -93,7 +89,7 @@ tweetInput.addEventListener("keypress", event => {
 //   tweetsContainer.appendChild(tweetItem)
 // })
 
-channel1.join()
+channel.join()
   .receive("ok", resp => { console.log("Joined successfully", resp) })
   .receive("error", resp => { console.log("Unable to join", resp) })
 

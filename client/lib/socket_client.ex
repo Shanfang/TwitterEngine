@@ -43,7 +43,7 @@ defmodule SocketClient do
 
     def handle_connected(transport, state) do
         Logger.info("Websocket is connected for user:#{state[:userID]}")
-        GenSocketClient.join(transport, "tweeter")
+        GenSocketClient.join(transport, "twitter")
         {:ok, state}
     end
 
