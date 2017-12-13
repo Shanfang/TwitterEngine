@@ -49,13 +49,12 @@ defmodule Twitter.Server do
     and all the tweets that mentions this user.
     """
     def handle_call({:connect, userID}, _from, state) do
-        tweets = []
-        mentions = []
         case user_status(userID) do
             :ok ->
-                tweets = :ets.lookup(:user_table, userID) |> List.first |> elem(3)
-                mentions = :ets.lookup(:mention_table, userID)
-                {:reply, {tweets, mentions}, state}       
+                {_, _, _, tweets} = :ets.lookup(:user_table, userID) |> List.first
+                # {_, mentions} = :ets.lookup(:mention_table, userID)
+                # {:reply, {tweets, mentions}, state} 
+                {:reply, tweets, state}
             :error ->
                 IO.puts "You are not registered, try it out now!"
                 {:reply, :error, state}       
@@ -130,7 +129,7 @@ defmodule Twitter.Server do
                     :ets.insert(:user_table, {to_subscribe_ID, [userID | elem(following_tuple, 1)], elem(following_tuple, 2), elem(following_tuple, 3)})
                     :ok             
                 :error ->
-                    error_msg = "Sorry, the user << " <> to_subscribe_ID <> " >> that you are subscribing to does not exist."
+                    error_msg = "Sorry, the user  #{to_subscribe_ID} that you are subscribing to does not exist."
                     IO.puts error_msg
                     :error
             end
