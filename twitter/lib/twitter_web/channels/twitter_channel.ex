@@ -37,6 +37,16 @@ defmodule TwitterWeb.TwitterChannel do
     {:noreply, socket}            
   end
 
+  # Handle re_connect 
+  def handle_in("re_connect", %{"userID" => userID}, socket) do 
+    case Server.connect(userID) do
+      {tweets, mentions} -> 
+          {:reply, {:ok, %{re_connect: "re_connect", userID: userID, tweets: tweets, mentions: mentions}}, socket}
+      :error ->
+          {:noreply, socket}
+    end
+  end
+
   # Handle subscribe
   def handle_in("subscribe", %{"to_subscribe_ID" => to_subscribe_ID, "userID" => userID}, socket) do
     case Server.subscribe(to_subscribe_ID, userID) do

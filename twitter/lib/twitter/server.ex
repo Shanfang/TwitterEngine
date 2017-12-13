@@ -55,10 +55,11 @@ defmodule Twitter.Server do
             :ok ->
                 tweets = :ets.lookup(:user_table, userID) |> List.first |> elem(3)
                 mentions = :ets.lookup(:mention_table, userID)
+                {:reply, {tweets, mentions}, state}       
             :error ->
                 IO.puts "You are not registered, try it out now!"
+                {:reply, :error, state}       
         end
-        {:reply, {tweets, mentions}, state}       
     end
 
     @doc """

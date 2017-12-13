@@ -25,9 +25,13 @@ defmodule SocketClient do
         hashtag_store = "hashtag_store.txt"
                         |> File.read!
                         |> String.split("\n")
+        query_store = "query_store.txt"
+                        |> File.read!
+                        |> String.split("\n")
+
         IO.puts "Set up websocket connection to #{inspect url}"
         {:connect, url, [], %{userID: userID, following_num: following_num, limit: limit, 
-            tweet_store: tweet_store, hashtag_store: hashtag_store}}
+            tweet_store: tweet_store, hashtag_store: hashtag_store, query_store: query_store}}
     end
 
 # ##############
@@ -36,7 +40,7 @@ defmodule SocketClient do
 #     def register_account(userID) do
 #         Logger.info("Got request from coordinator to register account...")
 
-#         ##### here if send to self(), then self is coordinator!!!!! as coordinator start this request
+#         ##### here, if send to self(), then self is coordinator!!!!! as coordinator start this request
 #         Process.send_after(userSocket, {:register_account, userID}, :timer.seconds(1))
 #     end
 # #############
@@ -57,7 +61,7 @@ defmodule SocketClient do
     def handle_joined(topic, _payload, transport, state) do
         Logger.info("User:#{state[:userID]} joined the topic: #{topic}")
         
-        GenSocketClient.push(transport, "tweeter", "register_account", %{userID: state[:userID]})
+        GenSocketClient.push(transport, "twitter", "register_account", %{userID: state[:userID]})
         Logger.info("Register an account with userID: #{state[:userID]}")
         
         Process.send_after(self(), {:subscribe, state[:following_num]}, :timer.seconds(1))
@@ -67,6 +71,9 @@ defmodule SocketClient do
         Process.send_after(self(), :re_tweet, :timer.seconds(1))
         
         Process.send_after(self(), :query, :timer.seconds(1))
+
+        Process.send_after(self(), :re_connect, :timer.seconds(3))
+
         {:ok, state}
     end
 
@@ -118,6 +125,15 @@ defmodule SocketClient do
         {:ok, state}
     end
 
+    def handle_reply(topic, _ref, %{"response" => %{"re_connect" => event, "userID" => userID, 
+                    "tweets" => tweets, "mentions" => mentions}}, _transport, state) do
+        Logger.warn("Reply for user: #{userID} \tEvent: #{event}\nYour time line:\n")
+        Enum.each(tweets, fn(tweet) -> IO.puts(tweet) end)
+        Logger.warn("Tweets that mentions you:")
+        Enum.each(mentions, fn(mention) -> IO.puts(mention) end)
+        {:ok, state}
+    end
+
     def handle_info(:connect, _transport, state) do
         Logger.info("Connecting")
         {:connect, state}
@@ -129,49 +145,53 @@ defmodule SocketClient do
             {:error, reason} ->
                 Logger.error("Error joining the topic #{topic}: #{inspect reason}")
                 Process.send_after(self(), {:join, topic}, :timer.seconds(1))
-            {:ok, _ref} -> Logger.info("joined again ^_^")
+            {:ok, _ref} -> Logger.info("Joined again ^_^")
         end
         {:ok, state}
     end
 
     def handle_info({:subscribe, following_num}, transport, state) do
-        # to_subscribe_ID = Enum.random(1..100) |> Integer.to_string
         to_subscribe_IDs = Enum.take_random(1..100, following_num) 
-
         Enum.each(to_subscribe_IDs, fn(to_subscribe_ID) -> 
             to_subscribe_ID = Integer.to_string(to_subscribe_ID)
             Logger.info("User:#{state[:userID]} is subscribing to User:#{to_subscribe_ID}")
-            GenSocketClient.push(transport, "tweeter", "subscribe", 
+            GenSocketClient.push(transport, "twitter", "subscribe", 
                             %{to_subscribe_ID: to_subscribe_ID, userID: state[:userID]})
         end)
         {:ok, state}
     end
     
     def handle_info({:send_tweet, num}, transport, state) do
-        # tweet = "Hello, Shanfang"
         tweets = Enum.take_random(state[:tweet_store], num)
         Enum.each(tweets, fn(tweet) -> 
                 Logger.info("User #{state[:userID]} is sending tweet: #{tweet}")
-                GenSocketClient.push(transport, "tweeter", "send_tweet", 
-                            %{tweet: tweet, userID: state[:userID]})
+                GenSocketClient.push(transport, "twitter", "send_tweet", 
+                                    %{tweet: tweet, userID: state[:userID]})
         end)
         {:ok, state}
     end
 
     def handle_info(:re_tweet, transport, state) do
-        tweet = "Hi, I am @Shanfang"
+        tweet = "Hi, I am #Shanfang"
         Logger.info("User #{state[:userID]} is retweeting: #{tweet}")
-        GenSocketClient.push(transport, "tweeter", "re_tweet", 
+        GenSocketClient.push(transport, "twitter", "re_tweet", 
                             %{tweet: tweet, userID: state[:userID]})
         {:ok, state}
     end
 
     def handle_info(:query, transport, state) do
         # query = "@Shanfang"
-        query = "#christmas"
+        [query | _] = Enum.take_random(state[:query_store], 1)
+        # query = "#christmas"
         Logger.info("User #{state[:userID]} is query with: #{query}")
-        GenSocketClient.push(transport, "tweeter", "query", 
+        GenSocketClient.push(transport, "twitter", "query", 
                             %{query: query, userID: state[:userID]})
+        {:ok, state}
+    end
+
+    def handle_info(:re_connect, transport, state) do
+        Logger.info("User #{state[:userID]} is reconnecting")
+        GenSocketClient.push(transport, "twitter", "re_connect", %{userID: state[:userID]})
         {:ok, state}
     end
 end
