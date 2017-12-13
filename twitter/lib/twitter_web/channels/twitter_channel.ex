@@ -41,6 +41,10 @@ defmodule TwitterWeb.TwitterChannel do
   def handle_in("re_connect", %{"userID" => userID}, socket) do 
     case Server.connect(userID) do
       {tweets, mentions} -> 
+          Logger.info("Timeline for user:#{userID}")
+          Enum.each(tweets, fn(tweet) -> IO.puts(tweet) end)
+          Logger.info("\nTweets that mention user:#{userID}")
+          Enum.each(mentions, fn(mention) -> IO.puts(mention) end)
           {:reply, {:ok, %{re_connect: "re_connect", userID: userID, tweets: tweets, mentions: mentions}}, socket}
       :error ->
           {:noreply, socket}
