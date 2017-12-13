@@ -79,47 +79,29 @@ defmodule SocketClient do
         {:ok, state}
     end
 
-
-    # def handle_reply(topic, _ref, %{"response" => %{"event" => event, "error" => error}}, _transport, state) do
-    #     Logger.info("Reply on event: #{event}\nPayload is: #{inspect error}")
-    #     {:ok, state}
-    # end
-
     def handle_reply(topic, _ref, %{"response" => %{"register_account" => event, "userID" => userID, 
                     "error" => error}}, _transport, state) do
-        # IO.puts "===================================================================="
         IO.puts("Reply for user: #{userID} \tEvent: #{event}\nError message: #{inspect error}")
         {:ok, state}
     end
 
     def handle_reply(topic, _ref, %{"response" => %{"subscribe" => event, "userID" => userID, 
                     "error" => error}}, _transport, state) do
-        # IO.puts "===================================================================="
         IO.puts("Reply for user: #{userID} \tEvent: #{event}\nError message: #{inspect error}")
         {:ok, state}
     end
 
     def handle_reply(topic, _ref, %{"response" => %{"userID" => userID, 
                     "query" => query, "result" => result}}, _transport, state) do
-        # IO.puts "===================================================================="
         IO.puts("Reply for user: #{userID} \tEvent: query for #{query}")
         Enum.each(result, fn(item) -> IO.puts(item) end)
-        # case length(result) !=0 do
-        #     true ->
-        #         Enum.each(result, fn(item) -> IO.puts(item) end)
-        #     _ ->
-        #         IO.puts "Oops, there is no matched query"
-        # end
         {:ok, state}
     end
 
     def handle_reply(topic, _ref, %{"response" => %{"re_connect" => event, "userID" => userID, 
                     "tweets" => tweets}}, _transport, state) do
-        # IO.puts "===================================================================="
         IO.puts("Reply for user: #{userID} \tEvent: #{event}\nYour time line:")
         Enum.each(tweets, fn(tweet) -> IO.puts(tweet) end)
-        # IO.puts "Tweets that mentions you:"
-        # Enum.each(mentions, fn(mention) -> IO.puts(mention) end)
         {:ok, state}
     end
 
