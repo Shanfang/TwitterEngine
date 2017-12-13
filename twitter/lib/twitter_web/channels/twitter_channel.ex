@@ -25,11 +25,11 @@ defmodule TwitterWeb.TwitterChannel do
     end
   end
 
-  # Handle send tweet 
-  def handle_in("send_tweet", %{"tweet" => tweet, "userID" => userID}, socket) do 
-    Server.send_tweet(tweet, userID)
-    {:noreply, socket}            
-  end
+  # # Handle send tweet 
+  # def handle_in("send_tweet", %{"tweet" => tweet, "userID" => userID}, socket) do 
+  #   Server.send_tweet(tweet, userID)
+  #   {:noreply, socket}            
+  # end
 
   # Handle re_tweet 
   def handle_in("re_tweet", %{"tweet" => tweet, "userID" => userID}, socket) do 

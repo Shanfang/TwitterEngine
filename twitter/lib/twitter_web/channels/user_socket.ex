@@ -3,7 +3,7 @@ defmodule TwitterWeb.UserSocket do
 
   ## Channels
   channel "twitter", TwitterWeb.TwitterChannel
-  
+  channel "following:*", TwitterWeb.FollowingChannel
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
   # transport :longpoll, Phoenix.Transports.LongPoll
