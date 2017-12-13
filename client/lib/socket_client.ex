@@ -1,5 +1,4 @@
 defmodule SocketClient do
-    # require Logger
     alias Phoenix.Channels.GenSocketClient
     @behaviour GenSocketClient
     
@@ -9,8 +8,6 @@ defmodule SocketClient do
             __MODULE__,
             Phoenix.Channels.GenSocketClient.Transport.WebSocketClient,
             {"ws://localhost:4000/socket/websocket", userID, following_num, limit}
-            # [],
-            # name: userID
             )
         IO.puts "socket process is: #{inspect socket}"
     end
@@ -32,17 +29,6 @@ defmodule SocketClient do
         {:connect, url, [], %{userID: userID, following_num: following_num, limit: limit, 
             tweet_store: tweet_store, hashtag_store: hashtag_store, query_store: query_store}}
     end
-
-# ##############
-#??????????? my problem for this approach is how to find out the socket process pid, so I ca  send it message 
-# to register account or tweet,etc
-#     def register_account(userID) do
-#         Logger.info("Got request from coordinator to register account...")
-
-#         ##### here, if send to self(), then self is coordinator!!!!! as coordinator start this request
-#         Process.send_after(userSocket, {:register_account, userID}, :timer.seconds(1))
-#     end
-# #############
 
     def handle_connected(transport, state) do
         IO.puts ("Websocket is connected for user:#{state[:userID]}")
@@ -101,21 +87,21 @@ defmodule SocketClient do
 
     def handle_reply(topic, _ref, %{"response" => %{"register_account" => event, "userID" => userID, 
                     "error" => error}}, _transport, state) do
-        IO.puts "===================================================================="
+        # IO.puts "===================================================================="
         IO.puts("Reply for user: #{userID} \tEvent: #{event}\nError message: #{inspect error}")
         {:ok, state}
     end
 
     def handle_reply(topic, _ref, %{"response" => %{"subscribe" => event, "userID" => userID, 
                     "error" => error}}, _transport, state) do
-        IO.puts "===================================================================="
+        # IO.puts "===================================================================="
         IO.puts("Reply for user: #{userID} \tEvent: #{event}\nError message: #{inspect error}")
         {:ok, state}
     end
 
     def handle_reply(topic, _ref, %{"response" => %{"userID" => userID, 
                     "query" => query, "result" => result}}, _transport, state) do
-        IO.puts "===================================================================="
+        # IO.puts "===================================================================="
         IO.puts("Reply for user: #{userID} \tEvent: query for #{query}")
         Enum.each(result, fn(item) -> IO.puts(item) end)
         # case length(result) !=0 do
@@ -128,12 +114,12 @@ defmodule SocketClient do
     end
 
     def handle_reply(topic, _ref, %{"response" => %{"re_connect" => event, "userID" => userID, 
-                    "tweets" => tweets, "mentions" => mentions}}, _transport, state) do
-        IO.puts "===================================================================="
+                    "tweets" => tweets}}, _transport, state) do
+        # IO.puts "===================================================================="
         IO.puts("Reply for user: #{userID} \tEvent: #{event}\nYour time line:")
         Enum.each(tweets, fn(tweet) -> IO.puts(tweet) end)
-        IO.puts "Tweets that mentions you:"
-        Enum.each(mentions, fn(mention) -> IO.puts(mention) end)
+        # IO.puts "Tweets that mentions you:"
+        # Enum.each(mentions, fn(mention) -> IO.puts(mention) end)
         {:ok, state}
     end
 
